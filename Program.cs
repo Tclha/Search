@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SearchEngineProject
@@ -9,16 +10,22 @@ namespace SearchEngineProject
     {
         static void Main(string[] args)
         {
+            string wordRx = @"\w+";
             Search search = new Search();
             search.initialize();
-            Console.Write("Ask shamz: ");
-            string term = Console.ReadLine();
-            search.searchTerm(term);
-
-            List<int> listA = search.tokens.wordOccurDictionary["april".GetHashCode()];
-            foreach(var a in listA)
+            string term = "o";
+            while (term != "")
             {
-                Console.WriteLine(a);
+                Console.Write("Ask shamz: ");
+                term = Console.ReadLine();
+                Match match = Regex.Match(term, wordRx, RegexOptions.IgnoreCase);
+                List<string> searchTerms = new List<string>();
+                while (match.Success)
+                {
+                    searchTerms.Add(match.Value);
+                    match = match.NextMatch();
+                }
+                search.multiWord(searchTerms);
             }
 
             Console.ReadKey();
