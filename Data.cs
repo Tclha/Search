@@ -17,26 +17,23 @@ namespace SearchEngineProject
         public int count = 0;
         public int idCount = 3;
 
-        // Create an XML reader for this file.
+        // Create an XML reader
         public void getAllTheData()
         {
-            using (XmlReader reader = XmlReader.Create("simplewiki-latest-pages-articles_1.xml"))
+            using (XmlReader reader = XmlReader.Create("simplewiki-latest-pages-articles_1.xml"))//get file
             {
                 Console.WriteLine("Loading Data...");
-                while (reader.Read())
+                while (reader.Read())//read is a built in fucntion of reader
                 {
-                    // Only detect start elements.
+                    // only detect start elements.
                     if (reader.IsStartElement())
                     {
-                        // Get element name and switch on it.
+                        //get element name and switch on it.
                         switch (reader.Name)
                         {
                             case "page":
-                                // Detect this element.
                                 break;
                             case "title":
-                                // Detect this title element.
-                                // Next read will contain text.
                                 if (reader.Read())
                                 {
                                     this.titles.Add(reader.Value.Trim());
@@ -72,7 +69,7 @@ namespace SearchEngineProject
                                 break;
                         }
                     }
-                    if (count == 100000) { break; }
+                if (count == 1000) { break; }
 
                     if (idCount == 2) { idCount = 0; }
                 }
