@@ -12,74 +12,83 @@ namespace SearchEngineProject
         public Data XMLdata = new Data();
 
         string wordRx = @"\w+";
-        string linkRx = @"[\[]{2}[a-zA-Z)0-9\s]+|[a-zA-Z)0-9\s]+[\]]{2}";
-        string h1Rx = @"[\=]{1}[a-zA-Z)0-9\s]+[\=]{1}";
-        string h2Rx = @"[\=]{2}[a-zA-Z)0-9\s]+[\=]{2}";
-        string h3Rx = @"[\=]{3}[a-zA-Z)0-9\s]+[\=]{3}";
-        string boldRx = @"[']{3}[a-zA-Z)0-9\s]+[']{3}";
+        //string linkRx = @"[\[]{2}[a-zA-Z)0-9\s]+|[a-zA-Z)0-9\s]+[\]]{2}";
+        //string h1Rx = @"[\=]{1}[a-zA-Z)0-9\s]+[\=]{1}";
+        //string h2Rx = @"[\=]{2}[a-zA-Z)0-9\s]+[\=]{2}";
+        //string h3Rx = @"[\=]{3}[a-zA-Z)0-9\s]+[\=]{3}";
+        //string boldRx = @"[']{3}[a-zA-Z)0-9\s]+[']{3}";
 
-        public Dictionary<int, List<int>> wordOccurDictionary = new Dictionary<int, List<int>>();
-        public Dictionary<int, Dictionary<int, List<int>>> myDic = new Dictionary<int, Dictionary<int, List<int>>>();
+        
+        public Dictionary<int, Dictionary<int, List<int>>> wordOccurDictionary = new Dictionary<int, Dictionary<int, List<int>>>();
 
-        public void tokenize()
+        public void tokenize2()
         {
             XMLdata.getAllTheData();
             int totalTokens = XMLdata.count;
             int currIDIndex = 0;
             int count = 0;
+            int locationCount = 0;
             Console.WriteLine("Processing Data...");
-            foreach(var textElement in XMLdata.texts)
+            foreach (var textElement in XMLdata.texts)
             {
-                Match match = Regex.Match(textElement, wordRx, RegexOptions.IgnoreCase);
-                // Here we check the Match instance.
+                Match match = Regex.Match(textElement, wordRx, RegexOptions.IgnoreCase);//USING REGEX (regular expressions class
+                //check the Match instance.
                 while (match.Success)
                 {
-                    if (!stopWords.ContainsKey(match.Value))
+                    if (!stopWords.ContainsKey(match.Value))//check matched word value in the dictionary of stopwords
                     {
-                        AddtoDict(match.Value.GetHashCode(), currIDIndex);
-                        match = match.NextMatch();
+                        AddtoDict(match.Value.GetHashCode(), currIDIndex, locationCount);
+                        match = match.NextMatch();//next match to traverse through every element in the textElement
                         count++;
+                        locationCount++;
                     }
-                    else
+                    else//stopword:
                     {
                         match = match.NextMatch();
                         count++;
+                        locationCount++;
                     }
                 }
+                locationCount = 0;
                 currIDIndex++;
-                if(currIDIndex % 1000 == 0)
+                if (currIDIndex % 1000 == 0)//just here to show the percentages
                 {
                     Console.WriteLine("{0} pages of {1} processed", currIDIndex, totalTokens);
                 }
             }
             Console.WriteLine("Done");
-        }
-        public void tokenize2()
-        {
-            XMLdata.getAllTheData();
-            int totalTokens = XMLdata.count;
 
         }
+        
 
-        public void AddtoDict(int key, int value, int location)
-        {
-            if (this.wordOccurDictionary.ContainsKey(key))
+        public void AddtoDict(int key, int pageID, int location)//function that adds to Dictionary with int as key
+        {                                                       //and dictionary as value
+            if (this.wordOccurDictionary.ContainsKey(key))//if key already present in Outside dictionary
             {
-                List<int> list = this.wordOccurDictionary[key];
-                if (list.Contains(value) == false)
+                Dictionary<int, List<int>> dictionary = this.wordOccurDictionary[key];//create a new dictionary == to value 
+                if (dictionary.ContainsKey(pageID))                                   //of the outside dictionary
+                {//if value dictionary contains pageID
+                    List<int> list = dictionary[pageID];//create a new list of value of pageID key
+                    list.Add(location);//add new Location of the occurence to that list
+                }
+                else //doesnt contain pageID
                 {
-                    list.Add(value);
+                    List<int> list = new List<int>();//create a brand new list
+                    list.Add(location);//add new location of the occurence to this list
+                    dictionary.Add(pageID, list); //load the list in the dictionary
                 }
             }
-            else
+            else//if the key doesn't exist in the inside dictionary
             {
-                List<int> list = new List<int>();
-                list.Add(value);
-                this.wordOccurDictionary.Add(key, list);
+                Dictionary<int, List<int>> dictionary = new Dictionary<int, List<int>>();//create a brand new dictionary for value
+                List<int> list = new List<int>();//create a list for inside the value
+                list.Add(location);//add new location of the occurence to this list 
+                dictionary.Add(pageID, list); //add list to inside dictionary
+                this.wordOccurDictionary.Add(key, dictionary);//add inside dictionary to outside dictionary
             }
         }
         
-        static Dictionary<string, bool> stopWords = new Dictionary<string, bool>{
+        static Dictionary<string, bool> stopWords = new Dictionary<string, bool>{//list of stopwords
         { "a", true },
         { "about", true },
         { "above", true },
